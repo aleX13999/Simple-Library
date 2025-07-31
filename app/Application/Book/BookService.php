@@ -13,6 +13,7 @@ use App\Application\Book\Service\BookGetter;
 use App\Application\Book\Validator\BookCreateValidator;
 use App\Application\Book\Validator\BookUpdateValidator;
 use App\Application\BookGenre\BookGenreService;
+use App\Application\Logger\LoggerInterface;
 use App\Models\Book;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\MassAssignmentException;
@@ -25,6 +26,7 @@ readonly class BookService
         private BookCreateValidator     $createValidator,
         private BookUpdateValidator     $updateValidator,
         private BookGenreService        $bookGenreService,
+        private LoggerInterface         $logger,
     ) {}
 
     public function getById(int $id): ?Book
@@ -55,6 +57,16 @@ readonly class BookService
                     'description'    => $createData->getDescription(),
                 ],
             );
+
+            $this->logger->log(
+                'Book created',
+                [
+                    'id'        => $book->id,
+                    'author_id' => $book->author_id,
+                    'title'     => $book->title,
+                    'type'      => $book->type->value,
+                    'createdAt' => $book->created_at,
+                ]);
 
             $this->bookGenreService->sync($book->id, $createData->getGenres());
         } catch (\Exception $exception) {
@@ -89,7 +101,7 @@ readonly class BookService
         }
 
         if ($updateData->hasPublishedYear()) {
-            $data['publishedYear'] = $updateData->getPublishedYear();
+            $data['published_year'] = $updateData->getPublishedYear();
         }
 
         if ($updateData->hasDescription()) {
@@ -103,6 +115,14 @@ readonly class BookService
 
             $book->fill($data);
             $book->save();
+
+            $context = [
+                'id'             => $book->id,
+                'updated_fields' => $data,
+            ];
+
+            $this->logger->log('Book updated', $context);
+
         } catch (MassAssignmentException|\Exception $exception) {
             throw new BookException($exception->getMessage(), $exception->getCode());
         }
@@ -118,5 +138,7 @@ readonly class BookService
         $book = $this->getter->get($id);
 
         $book->delete();
+
+        $this->logger->log('Book deleted', ['id' => $id]);
     }
 }

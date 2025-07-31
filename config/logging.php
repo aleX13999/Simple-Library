@@ -51,6 +51,11 @@ return [
     */
 
     'channels' => [
+        'books' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/books.log'),
+            'level' => 'info',
+        ],
 
         'stack' => [
             'driver' => 'stack',
