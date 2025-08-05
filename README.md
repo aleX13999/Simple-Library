@@ -47,6 +47,11 @@ MYSQL_DATABASE=
 MYSQL_USER=root
 MYSQL_PASSWORD=
 MYSQL_SERVER_VERSION=8.0
+
+# Данные первого администратора
+ADMIN_EMAIL=
+ADMIN_PASSWORD=
+ADMIN_NAME=
 ```
 
 4. Запустите контейнеры Docker:
