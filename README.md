@@ -57,16 +57,22 @@ ADMIN_NAME=
 4. Запустите контейнеры Docker:
 
 ```shell
-docker-compose up -d
+docker compose up -d
 ```
 
-5. Выполните миграции:
+5. Установите зависимости composer:
+
+```shell
+docker exec -it php-fpm composer install
+```
+
+6. Выполните миграции:
 
 ```shell
 docker exec -it php-fpm php artisan migrate
 ```
 
-6. Выполните сиды:
+7. Выполните сиды:
 
 Доступны 2 сида:
 - [RolesAndPermissionsSeeder.php](database%2Fseeders%2FRolesAndPermissionsSeeder.php) - **Создает роли права в БД**
@@ -85,7 +91,7 @@ docker exec -it php-fpm php artisan db:seed --class=RolesAndPermissionsSeeder
 docker exec -it php-fpm php artisan db:seed --class=AdminUserSeeder
 ```
 
-7. Сгенерируйте ключ приложения:
+8. Сгенерируйте ключ приложения:
 
 ```shell
 docker exec -it php-fpm php artisan key:generate

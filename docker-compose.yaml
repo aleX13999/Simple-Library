@@ -9,7 +9,7 @@ networks:
 services:
   php-fpm:
     container_name: php-fpm
-    build: /docker/php-fpm
+    build: docker/php-fpm
     volumes:
       - ./:/var/www
     environment:
@@ -21,7 +21,7 @@ services:
 
   nginx:
     container_name: nginx
-    build: /docker/nginx
+    build: docker/nginx
     volumes:
       - ./:/var/www
       - ./var/logs/nginx:/var/log/nginx
