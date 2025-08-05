@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\Admin;
 
 use App\Application\Genre\DTO\GenreCreateData;
 use App\Application\Genre\DTO\GenreUpdateData;
 use App\Application\Genre\Exception\GenreException;
 use App\Application\Genre\Exception\GenreValidationException;
 use App\Application\Genre\GenreService;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Genre\GenreCreateRequest;
 use App\Http\Requests\Genre\GenreListRequest;
 use App\Http\Requests\Genre\GenreUpdateRequest;
-use App\Http\Resources\GenreResource;
+use App\Http\Resources\Genre\GenreResource;
 use App\Repositories\Data\Genre\DTO\GenreBySearchFilterData;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\JsonResource;
 
 class GenreController extends Controller
 {
@@ -47,6 +47,8 @@ class GenreController extends Controller
             $genre = $this->genreService->create($creteData);
         } catch (GenreValidationException $e) {
             return new JsonResponse(['error' => $e->getMessage()], 422);
+        } catch (GenreException $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 400);
         }
 
         return new JsonResponse(['data' => new GenreResource($genre)]);

@@ -4,9 +4,22 @@ namespace App\Application\Author\DTO;
 
 class AuthorCreateData
 {
+    private int     $userId;
     private string  $firstName;
     private string  $lastName;
     private ?string $patronymic = null;
+
+    public function getUserId(): int
+    {
+        return $this->userId;
+    }
+
+    public function setUserId(int $userId): static
+    {
+        $this->userId = $userId;
+
+        return $this;
+    }
 
     public function getFirstName(): string
     {

@@ -11,21 +11,17 @@ class AuthorRepository implements AuthorRepositoryInterface
 {
     public function getOne(int $id): ?Author
     {
-        return Author::find($id);
+        return Author::with('books')->find($id);
     }
 
     public function getBySearchFilter(AuthorBySearchFilterDataInterface $searchFilterData): Collection
     {
-        $query = Author::with([])
+        $query = Author::withCount('books')
             ->orderBy('id');
 
-        if ($searchFilterData->getSkip() !== null) {
+        if ($searchFilterData->getSkip() !== null and $searchFilterData->getTake() !== null) {
             $query
-                ->skip($searchFilterData->getSkip());
-        }
-
-        if ($searchFilterData->getTake() !== null) {
-            $query
+                ->skip($searchFilterData->getSkip())
                 ->take($searchFilterData->getTake());
         }
 

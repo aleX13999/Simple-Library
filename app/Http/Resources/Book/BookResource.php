@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Book;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -15,15 +15,11 @@ class BookResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'title' => $this->title,
-            'author' => [
-                'id' => $this->author->id,
-                'first_name' => $this->author->first_name,
-                'last_name' => $this->author->last_name,
-            ],
+            'id'             => $this->id,
+            'title'          => $this->title,
+            'type'           => $this->type,
             'published_year' => $this->published_year,
-            'description' => $this->description,
+            'description'    => $this->description,
         ];
     }
 }

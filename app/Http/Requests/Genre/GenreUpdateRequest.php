@@ -22,7 +22,7 @@ class GenreUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'nullable|string',
+            'name' => 'sometimes|string|unique:genres',
         ];
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Author;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class AuthorCreateRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class AuthorCreateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user() && $this->user()->hasRole('admin');
     }
 
     /**
@@ -21,10 +22,15 @@ class AuthorCreateRequest extends FormRequest
      */
     public function rules(): array
     {
+        $userId = $this->user()->id;
+
         return [
-            'firstName'  => 'required|string',
-            'lastName'   => 'required|string',
-            'patronymic' => 'nullable|string',
+            'name'       => 'required|string|max:255',
+            'email'      => ['required', 'email', 'max:255', Rule::unique('users')->ignore($userId)],
+            'password'   => 'required|string|max:255',
+            'firstName'  => 'required|string|max:255',
+            'lastName'   => 'required|string|max:255',
+            'patronymic' => 'nullable|string|max:255',
         ];
     }
 }

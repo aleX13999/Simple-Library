@@ -34,6 +34,14 @@ readonly class BookService
         return $this->repository->getOne($id);
     }
 
+    /**
+     * @throws BookException
+     */
+    public function get(int $id): Book
+    {
+        return $this->getter->get($id);
+    }
+
     public function getBySearchFilter(BookBySearchFilterDataInterface $searchFilterData): Collection
     {
         return $this->repository->getBySearchFilter($searchFilterData);
@@ -64,8 +72,7 @@ readonly class BookService
                     'id'        => $book->id,
                     'author_id' => $book->author_id,
                     'title'     => $book->title,
-                    'type'      => $book->type->value,
-                    'createdAt' => $book->created_at,
+                    'type'      => $book->type,
                 ]);
 
             $this->bookGenreService->sync($book->id, $createData->getGenres());

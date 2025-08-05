@@ -1,15 +1,21 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\Admin;
 
 use App\Application\Author\AuthorService;
 use App\Application\Author\DTO\AuthorCreateData;
 use App\Application\Author\DTO\AuthorUpdateData;
 use App\Application\Author\Exception\AuthorException;
+use App\Application\Author\Exception\AuthorValidationException;
+use App\Application\User\DTO\UserCreateData;
+use App\Application\User\Exception\UserException;
+use App\Application\User\Exception\UserValidationException;
+use App\Application\User\UserService;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Author\AuthorCreateRequest;
 use App\Http\Requests\Author\AuthorListRequest;
 use App\Http\Requests\Author\AuthorUpdateRequest;
-use App\Http\Resources\AuthorResource;
+use App\Http\Resources\Author\AuthorResource;
 use App\Repositories\Data\Author\DTO\AuthorBySearchFilterData;
 use Illuminate\Http\JsonResponse;
 
@@ -17,6 +23,7 @@ class AuthorController extends Controller
 {
     public function __construct(
         private readonly AuthorService $authorService,
+        private readonly UserService   $userService,
     ) {}
 
     public function index(AuthorListRequest $request): JsonResponse
@@ -37,15 +44,27 @@ class AuthorController extends Controller
     {
         $validated = $request->validated();
 
-        $creteData = new AuthorCreateData();
-        $creteData
-            ->setFirstName($validated['firstName'])
-            ->setLastName($validated['lastName'])
-            ->setPatronymic($validated['patronymic'] ?? null);
+        $userCreateData = new UserCreateData();
+        $userCreateData
+            ->setName($validated['name'])
+            ->setEmail($validated['email'])
+            ->setPassword($validated['password'])
+            ->setRole('author');
 
         try {
-            $author = $this->authorService->create($creteData);
-        } catch (AuthorException $e) {
+            $user = $this->userService->create($userCreateData);
+
+            $authorCreateData = new AuthorCreateData();
+            $authorCreateData
+                ->setUserId($user->id)
+                ->setFirstName($validated['firstName'])
+                ->setLastName($validated['lastName'])
+                ->setPatronymic($validated['patronymic'] ?? null);
+
+            $author = $this->authorService->create($authorCreateData);
+        } catch (UserValidationException|AuthorValidationException $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 422);
+        } catch (UserException|AuthorException $e) {
             return new JsonResponse(['error' => $e->getMessage()], 400);
         }
 
@@ -72,7 +91,6 @@ class AuthorController extends Controller
         }
 
         if (array_key_exists('patronymic', $validated)) {
-
             $updateData->setPatronymic($validated['patronymic']);
         }
 

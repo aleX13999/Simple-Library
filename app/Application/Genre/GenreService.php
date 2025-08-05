@@ -32,18 +32,30 @@ readonly class GenreService
         return $this->genreRepository->getBySearchFilter($searchFilterData);
     }
 
+    public function getWithBookCountBySearchFilter(GenreBySearchFilterDataInterface $searchFilterData): Collection
+    {
+        return $this->genreRepository->getWithBookCountBySearchFilter($searchFilterData);
+    }
+
     /**
      * @throws GenreValidationException
+     * @throws GenreException
      */
     public function create(GenreCreateData $createData): Genre
     {
         $this->createValidator->validate($createData);
 
-        return Genre::create(
-            [
-                'name' => $createData->getName(),
-            ],
-        );
+        try {
+            $genre = Genre::create(
+                [
+                    'name' => $createData->getName(),
+                ],
+            );
+        } catch (MassAssignmentException $exception) {
+            throw new GenreException($exception->getMessage());
+        }
+
+        return $genre;
     }
 
     /**

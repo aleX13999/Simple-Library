@@ -24,16 +24,27 @@ class GenreRepository implements GenreRepositoryInterface
         return Genre::query()->whereIn('id', $ids)->get();
     }
 
+    public function getWithBookCountBySearchFilter(GenreBySearchFilterDataInterface $searchFilterData): Collection
+    {
+        $query = Genre::query()->withCount('books')->orderBy('id');
+
+        if ($searchFilterData->getSkip() !== null and $searchFilterData->getTake() !== null) {
+            $query
+                ->skip($searchFilterData->getSkip())
+                ->take($searchFilterData->getTake());
+        }
+
+        return $query->get();
+    }
+
     public function getBySearchFilter(GenreBySearchFilterDataInterface $searchFilterData): Collection
     {
         $query = Genre::query()->orderBy('id');
 
-        if ($searchFilterData->getSkip() !== null) {
-            $query->skip($searchFilterData->getSkip());
-        }
-
-        if ($searchFilterData->getTake() !== null) {
-            $query->take($searchFilterData->getTake());
+        if ($searchFilterData->getSkip() !== null and $searchFilterData->getTake() !== null) {
+            $query
+                ->skip($searchFilterData->getSkip())
+                ->take($searchFilterData->getTake());
         }
 
         return $query->get();

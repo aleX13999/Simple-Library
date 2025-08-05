@@ -24,12 +24,12 @@ class BookUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'authorId'      => 'nullable|integer|min:0',
-            'title'         => 'nullable|string',
-            'type'          => ['nullable', new Enum(BookTypeEnum::class)],
-            'publishedYear' => 'nullable|integer',
-            'description'   => 'nullable|string',
-            'genre_ids'     => 'nullable|array',
+            'authorId'      => 'sometimes|integer|min:1',
+            'title'         => 'sometimes|string|unique:books',
+            'type'          => ['sometimes', new Enum(BookTypeEnum::class)],
+            'publishedYear' => ['sometimes', 'integer', 'between:1900,' . date('Y')],
+            'description'   => 'sometimes|string',
+            'genre_ids'     => 'sometimes|array',
             'genre_ids.*'   => 'integer',
         ];
     }

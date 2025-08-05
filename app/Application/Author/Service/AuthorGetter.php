@@ -20,7 +20,7 @@ readonly class AuthorGetter
         $author = $this->authorRepository->getOne($id);
 
         if (!$author) {
-            throw new AuthorException('Author not found');
+            throw new AuthorException("Author with id '$id' not found");
         }
 
         return $author;

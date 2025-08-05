@@ -21,17 +21,33 @@ class BookRepository implements BookRepositoryInterface
 
     public function getBySearchFilter(BookBySearchFilterDataInterface $searchFilterData): Collection
     {
-        $query = Book::with(['author', 'genres'])
-            ->orderBy('id');
+        $query = Book::with(['author', 'genres']);
 
-        if ($searchFilterData->getSkip() !== null) {
+        if ($searchFilterData->getSkip() !== null and $searchFilterData->getTake() !== null) {
             $query
-                ->skip($searchFilterData->getSkip());
+                ->skip($searchFilterData->getSkip())
+                ->take($searchFilterData->getTake());
         }
 
-        if ($searchFilterData->getTake() !== null) {
+        if ($searchFilterData->getAuthorId() !== null) {
             $query
-                ->take($searchFilterData->getTake());
+                ->where('author_id', $searchFilterData->getAuthorId());
+        }
+
+        if ($searchFilterData->getTitle() !== null) {
+            $query
+                ->where('title', 'like', '%' . $searchFilterData->getTitle() . '%');
+        }
+
+        if (($genreIds = $searchFilterData->getGenreIds()) !== null) {
+            $query->whereHas('genres', function ($q) use ($genreIds) {
+                $q->whereIn('genres.id', $genreIds);
+            });
+        }
+
+        if ($searchFilterData->getIsSortByTitle() !== null) {
+            $query
+                ->orderBy('title', $searchFilterData->getIsSortByTitle() ? 'ASC' : 'DESC');
         }
 
         return $query->get();

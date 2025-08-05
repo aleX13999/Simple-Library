@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\Admin;
 
 use App\Application\Book\BookService;
 use App\Application\Book\DTO\BookCreateData;
@@ -8,10 +8,12 @@ use App\Application\Book\DTO\BookUpdateData;
 use App\Application\Book\Exception\BookException;
 use App\Application\Book\Exception\BookValidationException;
 use App\Application\BookGenre\Exception\BookGenreException;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Book\BookCreateRequest;
 use App\Http\Requests\Book\BookListRequest;
 use App\Http\Requests\Book\BookUpdateRequest;
-use App\Http\Resources\BookResource;
+use App\Http\Resources\Book\BookFullDataResource;
+use App\Http\Resources\Book\BookResource;
 use App\Repositories\Data\Book\DTO\BookBySearchFilterData;
 use Illuminate\Http\JsonResponse;
 
@@ -28,11 +30,15 @@ class BookController extends Controller
         $data = new BookBySearchFilterData();
         $data
             ->setSkip($validated['skip'] ?? null)
-            ->setTake($validated['take'] ?? null);
+            ->setTake($validated['take'] ?? null)
+            ->setAuthorId($validated['author_id'] ?? null)
+            ->setTitle($validated['title'] ?? null)
+            ->setGenreIds($validated['genre_ids'] ?? null)
+            ->setIsSortByTitle($validated['is_sort_by_title'] ?? null);
 
         $books = $this->bookService->getBySearchFilter($data);
 
-        return new JsonResponse(['data' => BookResource::collection($books)]);
+        return new JsonResponse(['data' => BookFullDataResource::collection($books)]);
     }
 
     public function store(BookCreateRequest $request): JsonResponse

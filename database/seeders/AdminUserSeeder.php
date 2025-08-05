@@ -33,10 +33,11 @@ class AdminUserSeeder extends Seeder
                     'password' => Hash::make($adminPassword),
                 ],
             );
-            $admin->assignRole($adminRole);
             $this->command->info("Admin user created successfully: {$adminEmail}");
         } else {
             $this->command->info("Admin user already exists: {$adminEmail}");
         }
+
+        $admin->assignRole($adminRole);
     }
 }

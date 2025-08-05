@@ -24,10 +24,10 @@ class BookCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'authorId'      => 'required|integer|min:0',
-            'title'         => 'required|string',
+            'authorId'      => 'required|integer|min:1',
+            'title'         => 'required|string|unique:books',
             'type'          => ['required', new Enum(BookTypeEnum::class)],
-            'publishedYear' => 'nullable|integer',
+            'publishedYear' => ['nullable', 'integer', 'between:1900,' . date('Y')],
             'description'   => 'nullable|string',
             'genre_ids'     => 'nullable|array',
             'genre_ids.*'   => 'integer',

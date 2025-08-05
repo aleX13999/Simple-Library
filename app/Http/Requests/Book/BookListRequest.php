@@ -22,8 +22,25 @@ class BookListRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'skip' => 'nullable|integer|min:0',
-            'take' => 'nullable|integer|min:1',
+            'skip'             => 'sometimes|integer|min:0',
+            'take'             => 'sometimes|integer|min:1',
+            'author_id'        => 'sometimes|int|min:1',
+            'title'            => 'sometimes|string|max:255',
+            'genre_ids'        => 'sometimes|array',
+            'genre_ids.*'      => 'integer',
+            'is_sort_by_title' => 'sometimes|boolean',
+        ];
+    }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'genre_ids.*.integer' => 'Genre Ids must be an integer.',
         ];
     }
 }

@@ -11,7 +11,7 @@ class AuthorUpdateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user() && ($this->user()->hasRole('admin') || $this->user()->hasRole('author'));
     }
 
     /**
@@ -22,9 +22,9 @@ class AuthorUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'firstName'  => 'nullable|string',
-            'lastName'   => 'nullable|string',
-            'patronymic' => 'nullable|string',
+            'firstName'  => 'sometimes|string',
+            'lastName'   => 'sometimes|string',
+            'patronymic' => 'sometimes|string',
         ];
     }
 }

@@ -2,60 +2,70 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Application\User\DTO\UserCreateData;
+use App\Application\User\Exception\UserException;
+use App\Application\User\Exception\UserValidationException;
+use App\Application\User\UserService;
+use App\Http\Requests\User\AdminRegisterRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    public function __construct(
+        private readonly UserService $userService,
+    ) {}
+
     public function register(Request $request): JsonResponse
     {
-        $data = $request->validate(
+        $validated = $request->validate(
             [
                 'name'     => 'required|string',
-                'email'    => 'required|string|email',
+                'email'    => 'required|email|unique:users',
                 'password' => 'required|string',
             ],
         );
 
-        $user = User::create(
-            [
-                'name'     => $data['name'],
-                'email'    => $data['email'],
-                'password' => Hash::make($data['password']),
-            ],
-        );
+        $createUserData = new UserCreateData();
+        $createUserData
+            ->setName($validated['name'])
+            ->setEmail($validated['email'])
+            ->setPassword($validated['password']);
+
+        try {
+            $user = $this->userService->create($createUserData);
+        } catch (UserValidationException $exception) {
+            return new JsonResponse(['errors' => $exception->getMessage()], 422);
+        } catch (UserException $exception) {
+            return new JsonResponse(['errors' => $exception->getMessage()], 400);
+        }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json(['token' => $token], 201);
     }
 
-    public function registerAdmin(Request $request): JsonResponse
+    public function registerAdmin(AdminRegisterRequest $request): JsonResponse
     {
-        $validated = $request->validate(
-            [
-                'name'     => 'required|string|max:255',
-                'email'    => 'required|email|unique:users',
-                'password' => 'required|string',
-            ],
-        );
+        $validated = $request->validated();
 
-        if (auth()->user() && !auth()->user()->hasRole('admin')) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        $createUserData = new UserCreateData();
+        $createUserData
+            ->setName($validated['name'])
+            ->setEmail($validated['email'])
+            ->setPassword($validated['password']);
+
+        try {
+            $user = $this->userService->create($createUserData);
+
+            $user->assignRole('admin');
+
+        } catch (UserValidationException $exception) {
+            return new JsonResponse(['errors' => $exception->getMessage()], 422);
+        } catch (UserException $exception) {
+            return new JsonResponse(['errors' => $exception->getMessage()], 400);
         }
-
-        $user = User::create(
-            [
-                'name'     => $validated['name'],
-                'email'    => $validated['email'],
-                'password' => Hash::make($validated['password']),
-            ],
-        );
-
-        $user->assignRole('admin');
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -64,21 +74,17 @@ class AuthController extends Controller
 
     public function login(Request $request): JsonResponse
     {
-        $data = $request->validate(
+        $validated = $request->validate(
             [
                 'email'    => 'required|string|email',
                 'password' => 'required|string',
             ],
         );
 
-        $user = User::where('email', $data['email'])->first();
+        $user = $this->userService->getOneByEmail($validated['email']);
 
-        if (!$user || !Hash::check($data['password'], $user->password)) {
-            throw ValidationException::withMessages(
-                [
-                    'email' => ['The provided credentials are incorrect.'],
-                ],
-            );
+        if (!$user || !Hash::check($validated['password'], $user->password)) {
+            return new JsonResponse(['error' => 'The provided credentials are incorrect.'], 403);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;

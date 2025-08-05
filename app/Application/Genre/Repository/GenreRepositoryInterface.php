@@ -12,4 +12,5 @@ interface GenreRepositoryInterface
     public function getOneByName(string $name): ?Genre;
     public function getByIds(array $ids): Collection;
     public function getBySearchFilter(GenreBySearchFilterDataInterface $searchFilterData): Collection;
+    public function getWithBookCountBySearchFilter(GenreBySearchFilterDataInterface $searchFilterData): Collection;
 }
