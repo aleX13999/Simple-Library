@@ -86,6 +86,11 @@ docker exec -it php-fpm php artisan db:seed --class=AdminUserSeeder
 docker exec -it php-fpm php artisan key:generate
 ```
 
+---
+
+# Логирование
+
+**После любых действий над данными о книге записываются короткое уведомление в логи приложения в файл `storage/logs/books.log`.**
 
 ---
 
